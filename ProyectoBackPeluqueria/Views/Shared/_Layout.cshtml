@@ -1,0 +1,109 @@
+﻿@using System.Security.Claims
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+
+@{
+    string imagen = "";
+    if (User.Identity.IsAuthenticated)
+    { 
+        imagen = Configuration.GetValue<string>("AzureUrls:AvatarsContainer") + User.FindFirst("Imagen").Value;
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ProyectoBackPeluqueria</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ProyectoBackPeluqueria.styles.css" asp-append-version="true" />
+    <!-- FullCalendar CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.2.0/fullcalendar.min.css" rel="stylesheet">
+</head>
+<body>
+
+    @if (User.Identity.IsAuthenticated){
+        <header>
+            <!-- Navbar fija en la parte superior con fondo claro -->
+            <nav class="navbar navbar-expand-sm navbar-light bg-light fixed-top">
+                <div class="container-fluid">
+                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Iris D'Vicent</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Reservas" asp-action="Create">Nueva reserva</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Management" asp-action="Index" asp-route-id="@User.FindFirstValue(ClaimTypes.NameIdentifier)">Administración</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="javascript:void(0);" class="nav-link text-danger" onclick="confirmarLogout()">Cerrar Sesión</a>
+                            </li>
+                        </ul>
+
+                        @if (imagen != null && imagen != "")
+                        {
+                            <div class="ms-auto logo">
+                                <img src="@imagen" alt="Avatar" class="rounded-circle" style="width: 50px; height: 50px;" />
+                            </div>
+                        }
+                    </div>
+
+                </div>
+            </nav>
+        </header>
+    }
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="https://kit.fontawesome.com/88979a229b.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        function confirmarLogout() {
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "Tu sesión se cerrará y perderás el acceso.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Sí, cerrar sesión",
+                cancelButtonText: "Cancelar",
+            confirmButtonColor: '#c68a54', // Color del botón
+            customClass: {
+                 confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+            }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = "/Management/Logout"; // Ruta a tu Logout
+                }
+            });
+        }
+    </script>
+
+    <style>
+        footer {
+            background-color: white;
+        }
+    </style>
+
+</body>
+</html>
+ 

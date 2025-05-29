@@ -1,0 +1,640 @@
+﻿@using NugetProyectoBackPeluqueria.Models
+
+@using System.Security.Claims
+@model Usuario
+
+@{
+    Reserva proximaReserva = (Reserva)ViewData["ProximaReserva"];
+    string servicioProximaReserva = (string)ViewData["ServicioProximaReserva"];
+    string fechaHoy = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day).ToLongDateString();
+}
+
+@if(Model != null) {
+    @if (int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)) == Model.Id)
+    {
+        <div class="text-center">
+            <h1 class="display-3 text-primary">Bienvenido/a, @User.FindFirstValue(ClaimTypes.Name)</h1>
+            <p class="text-center text-secondary">Aquí puedes ver tus citas y la información de tu perfil</p>
+        </div>
+    }
+    else
+    {
+        <div class="text-center">
+            <h1 class="display-3 text-primary">Perfil de @Model.Nombre</h1>
+            <p class="text-center text-secondary">Aquí puedes ver sus citas y la información de su perfil</p>
+        </div>
+        <div class="d-flex justify-content-center mb-4">
+            <a asp-controller="Management" asp-action="Index" asp-route-id="@User.FindFirstValue(ClaimTypes.NameIdentifier)" class="btn btn-secondary mx-2">
+                <i class="fa-solid fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    }
+
+
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card shadow-lg rounded" style="background-color: rgba(220, 138, 62, 0.1); border: 1px solid rgba(220, 138, 62, 0.3);">
+                <div class="card-body">
+                    <h5 class="card-title" style="color: #dc8a3e;">Información de perfil</h5>
+                    <p class="card-text"><strong>Nombre:</strong> @Model.Nombre @Model.Apellidos</p>
+                    <p class="card-text"><strong>Correo:</strong> @Model.Email</p>
+                    <p class="card-text"><strong>Teléfono:</strong> @Model.Telefono</p>
+                </div>
+                <div class="card-footer">
+                    <a class="btn btn-primary btn-lg" asp-action="Edit" asp-route-id="@Model.Id">Editar Perfil</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.IdRolUsuario == 1)
+    {
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card shadow-lg rounded" style="background-color: rgba(220, 138, 62, 0.1); border: 1px solid rgba(220, 138, 62, 0.3);">
+                    <div class="card-body">
+                        @if (proximaReserva == null)
+                        {
+                            <h5 class="card-title" style="color: #dc8a3e;">No tienes reservas a futuro, si quieres reservar, pincha <a class="linkNueva" asp-controller="Reservas" asp-action="Create">aquí</a></h5>
+                        }
+                        else
+                        {
+                            <h5 class="card-title" style="color: #dc8a3e;">Próxima reserva</h5>
+                            <p class="card-text"><strong>Servicio:</strong> @servicioProximaReserva</p>
+                            <p class="card-text"><strong>Fecha:</strong> @proximaReserva.FechaHoraInicio</p>
+                        }
+                    </div>
+                    @if (proximaReserva != null)
+                    {
+                        <div class="card-footer">
+                            <a href="javascript:void(0);" onclick="confirmarEliminacion(@proximaReserva.Id)" class="tect-danger">
+                                <i class="fa-solid fa-trash-can svg-icon text-danger"></i>
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+
+
+    @if (User.IsInRole("Admin") && Model.IdRolUsuario == 2)
+    {
+        <div class="row mt-3">
+
+            <!-- Calendario: Aparece después de los botones en dispositivos móviles -->
+            <div class="col-lg-6 col-md-12 col-sm-12 mb-5 order-2 order-sm-1">
+                <h3 class="text-center text-primary">Hoy es @fechaHoy</h3>
+                <div id="calendar" class="border rounded shadow-sm p-3"></div>
+            </div>
+
+            <!-- Botones (Cajas) -->
+            <div class="col-lg-6 col-md-12 col-sm-12 order-1 order-sm-2">
+
+                <!-- Caja 1: Gestionar Reservas (Redirige a una página) -->
+                <div class="col-10 offset-1 d-flex justify-content-center mb-4">
+                    <a asp-controller="Reservas" asp-action="Index" class="carta">
+                        <div class="text">
+                            <span>Gestionar Reservas</span>
+                            <p class="subtitle">Aquí visualizar todas las reservas</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Caja 2: Gestionar Servicios (Abre un Modal) -->
+                <div class="col-10 offset-1 d-flex justify-content-center mb-4">
+                    <a asp-controller="Servicios" asp-action="Index" class="carta">
+                        <div class="text">
+                            <span>Gestionar Servicios</span>
+                            <p class="subtitle">Gestiona todos los servicios que ofreces.</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Caja 3: Gestionar Clientes (Redirige a una página) -->
+                <div class="col-10 offset-1 d-flex justify-content-center mb-4">
+                    <a asp-controller="Clientes" asp-action="Index" class="carta">
+                        <div class="text">
+                            <span>Gestionar Clientes</span>
+                            <p class="subtitle">Consulta y edita la información de tus clientes.</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Caja 4: Agregar Disponibilidad (Abre un Modal) -->
+                <div class="col-10 offset-1 d-flex justify-content-center mb-4">
+                    <div data-bs-toggle="modal" data-bs-target="#disponibilidadModal" class="carta">
+                        <div class="text">
+                            <span>Agregar disponibilidad</span>
+                            <p class="subtitle">Agrega tu disponibilidad para los servicios.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="disponibilidadModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel">Agregar Disponibilidad</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formDisponibilidad">
+                        <div class="mb-3">
+                            <label for="fechaInicio" class="form-label">Fecha Inicio</label>
+                            <input type="date" class="form-control" id="fechaInicio" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fechaFin" class="form-label">Fecha Fin</label>
+                            <input type="date" class="form-control" id="fechaFin" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Agregar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+
+<!-- Cargar jQuery primero -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Cargar Moment.js antes de FullCalendar -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+<!-- Ahora cargamos FullCalendar -->
+<script src="
+https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js
+"></script>
+
+<script>
+    $(document).ready(function () {
+      $('#formDisponibilidad').submit(function (e) {
+        e.preventDefault();
+
+        const fechaInicio = $('#fechaInicio').val();
+        const fechaFin = $('#fechaFin').val();
+
+        if (!fechaInicio || !fechaFin) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Fechas incompletas',
+            text: 'Por favor, selecciona ambas fechas.',
+            confirmButtonColor: '#c68a54', // Color del botón
+            customClass: {
+                 confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+            }
+          });
+          return;
+        }
+
+        $.ajax({
+          url: '/Management/AgregarRangoDisponibilidad',
+          type: 'POST',
+          data: { fechaInicio, fechaFin },
+          success: function (response) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Disponibilidad agregada',
+              text: `${response.diasAgregados} días agregados, ${response.diasExistentes} ya existían.`,
+            confirmButtonColor: '#c68a54', // Color del botón
+            customClass: {
+                 confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+            }
+            }).then(() => {
+              $('#disponibilidadModal').modal('hide');
+            });
+          },
+          error: function () {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'No se pudo agregar la disponibilidad.',
+            confirmButtonColor: '#c68a54', // Color del botón
+            customClass: {
+                 confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+            }
+            });
+          }
+        });
+      });
+    });
+</script>
+
+<script>
+
+
+
+             function cargarDiasDisponibles(calendar) {
+        $.ajax({
+            url: '/Management/ObtenerDiasDisponibles',
+            type: 'GET',
+            success: function (data) {
+                setTimeout(() => {
+                    data.forEach(function (fecha) {
+                        let diaElemento = document.querySelector(`[data-date="${fecha.start}"]`);
+                        if (diaElemento) {
+                            diaElemento.style.backgroundColor = 'rgba(0, 255, 0, 0.1)'; // Verde transparente
+                        }
+                    });
+                }, 100);
+            },
+            error: function () {
+                console.error("No se pudieron cargar los días disponibles.");
+            }
+        });
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth', // Cambia a timeGridDay o timeGridWeek
+            locale: 'es', // Español
+            firstDay: 1, // Lunes como primer día de la semana
+            selectable: true, // Permitir selección de fechas
+
+            // Cambiar los colores del calendario
+            themeSystem: 'bootstrap5', // Para usar el sistema de temas de Bootstrap 5
+
+            // Estilo del fondo del calendario
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'timeGridDay,listWeek,dayGridMonth'
+            },
+            // Cambiar de vista automáticamente
+            responsive: true,  // Habilitar la adaptación al tamaño de pantalla
+            views: {
+                timeGridDay: {
+                    // Personalizar vista diaria en pantallas pequeñas si es necesario
+                    eventLimit: 3  // Limitar el número de eventos visibles para que no se apilen
+                },
+                timeGridWeek: {
+                    eventLimit: 5  // Limitar los eventos para que no se apilen en una pantalla pequeña
+                },
+                dayGridMonth: {
+                    eventLimit: 6  // Limitar los eventos en la vista de mes
+                }
+            },
+
+            // Cargar eventos desde el backend
+            events: function (fetchInfo, successCallback, failureCallback) {
+                $.ajax({
+                    url: '@Url.Action("ObtenerEventosCalendario", "Management")', // Llama al controlador
+                    type: 'GET',
+                    success: function (data) {
+                        var eventos = [];
+
+                        data.forEach(function (evento) {
+                            eventos.push({
+                                id: evento.id, // ID del evento
+                                title: evento.title, // Título del evento (Servicio)
+                                start: evento.start, // Fecha de inicio
+                                end: evento.end, // Fecha de fin
+                                backgroundColor: "#dc8a3e", // Color de fondo
+                                borderColor: "#c07b2f", // Color del borde
+                                textColor: "white" // Color del texto
+                            });
+                        });
+
+                        successCallback(eventos);
+                        cargarDiasDisponibles(calendar);
+                    },
+                    error: function () {
+                        failureCallback();
+                    }
+                });
+            },
+
+            eventDidMount: function(info) {
+                // Coloca los estilos personalizados para los eventos
+                info.el.style.backgroundColor = "#dc8a3e"; // Color de fondo
+                info.el.style.borderColor = "#c07b2f"; // Color del borde
+                info.el.style.color = "white"; // Color del texto
+            },
+
+            // Mostrar solo el título del evento
+            eventContent: function (arg) {
+                return {
+                    html: arg.event.title // Solo el título, sin la hora
+                };
+            },
+
+             // Configuración de la duración de los eventos
+            slotDuration: '00:30:00', // Duración de cada celda (30 minutos)
+            slotMinTime: '09:00:00', // Mínima hora visible: 9 AM
+            slotMaxTime: '20:00:00', // Máxima hora visible: 8 PM
+            eventLimit: false, // Desactivar el límite de eventos
+
+            // Habilitar la edición de la duración de los eventos (arrastrar para cambiar duración)
+            eventDurationEditable: true,
+
+            // Interacción con los eventos (mover o redimensionar)
+            eventResize: function(info) {
+                Swal.fire({
+                    title: 'Evento ajustado',
+                    text: `Nuevo horario: Desde ${info.event.start.toLocaleString()} hasta ${info.event.end.toLocaleString()}`,
+                    icon: 'success',
+                    confirmButtonColor: '#c68a54'
+                });
+            },
+
+                // Cuando se hace clic en un evento
+                eventClick: function (info) {
+        $.ajax({
+            url: `/Management/GetDetallesReserva?id=${info.event.id}`, // Ruta del controlador
+            type: 'GET',
+            success: function (reserva) {
+                Swal.fire({
+                    title: "Detalles de la Reserva",
+                    html: `
+                        <strong>Cliente:</strong> ${reserva.cliente}<br>
+                        <strong>Servicio:</strong> ${reserva.servicio}<br>
+                        <strong>Fecha:</strong> ${new Date(reserva.fechaHoraInicio).toLocaleDateString()}<br>
+                        <strong>Hora de inicio:</strong> ${new Date(reserva.fechaHoraInicio).toLocaleTimeString()}<br>
+                        <strong>Hora de fin:</strong> ${new Date(reserva.fechaHoraFin).toLocaleTimeString()}
+                    `,
+                    icon: "info",
+            confirmButtonColor: '#c68a54', // Color del botón
+            customClass: {
+                 confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+            }
+                });
+            },
+            error: function (xhr, status, error) {
+                console.log(xhr.responseText); // Ver detalles del error
+                Swal.fire({
+                    title: "Error",
+                    text: "No se pudo obtener la información de la reserva.",
+                    icon: "error",
+            confirmButtonColor: '#c68a54', // Color del botón
+            customClass: {
+                 confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+            }
+                });
+            }
+        });
+    },
+
+
+                select: function (info) {
+
+        // Convertir las cadenas de fecha a objetos Date
+        let startDate = new Date(info.startStr);
+        let endDate = new Date(info.endStr);
+
+        // Restar un día a la fecha de finalización
+        endDate.setDate(endDate.getDate() - 1);
+
+        // Mostrar la alerta con las fechas en formato adecuado
+        Swal.fire({
+            title: "¿Agregar disponibilidad?",
+            text: startDate.getDate() == endDate.getDate() ? `Para el día ${startDate.toLocaleDateString()}` : `Desde el ${startDate.toLocaleDateString()} hasta el ${endDate.toLocaleDateString()}`,
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Sí, agregar",
+            cancelButtonText: "Cancelar",
+            confirmButtonColor: '#c68a54', // Color del botón
+            customClass: {
+                 confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Convertir las fechas a formato ISO para enviarlas al backend
+                const startISO = startDate.toISOString();
+                const endISO = endDate.toISOString();
+
+                // Realizar la petición AJAX
+                $.ajax({
+                    url: '/Management/AgregarRangoDisponibilidad',
+                    type: 'POST',
+                    data: { fechaInicio: startISO, fechaFin: endISO }, // Enviamos las fechas en formato ISO
+                    success: function (response) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Disponibilidad agregada',
+                            text: `${response.diasAgregados} días agregados, ${response.diasExistentes} ya existían.`,
+            confirmButtonColor: '#c68a54', // Color del botón
+            customClass: {
+                 confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+            }
+                        }).then(() => {
+                            calendar.refetchEvents();
+                        });
+                    },
+                    error: function () {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudo agregar la disponibilidad.',
+            confirmButtonColor: '#c68a54', // Color del botón
+            customClass: {
+                 confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+            }
+                        });
+                    }
+                });
+            }
+        });
+    },
+
+            slotMinHeight: 80,
+            windowResize: function() {
+                if (window.innerWidth < 768) {
+                    // Cambia a 'listWeek' o 'timeGridDay' en dispositivos móviles
+                    calendar.changeView('listWeek');
+                } else {
+                    calendar.changeView('dayGridMonth');
+                }
+            },
+
+            // Ajuste de la vista semanal en pantallas pequeñas
+            eventClassNames: 'fc-responsive-event',
+
+            // Para que los botones se adapten al idioma
+            buttonText: {
+                today: 'Hoy',
+                month: 'Mes',
+                week: 'Semana',
+                day: 'Día'
+            }
+        });
+
+        cargarDiasDisponibles(calendar);
+
+        calendar.render();
+
+            calendar.on('windowResize', function() {
+        if (window.innerWidth < 768) {
+            calendar.changeView('timeGridDay');  // Vista diaria en pantallas pequeñas
+        } else {
+            calendar.changeView('dayGridMonth');  // Vista mensual en pantallas grandes
+        }
+    });
+    });
+</script>
+
+<script>
+    function confirmarEliminacion(reservaId) {
+        Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Eliminarás la reserva permanentemente.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar",
+            confirmButtonColor: '#c68a54', // Color del botón
+            customClass: {
+                 confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                eliminarReserva(reservaId);
+            }
+        });
+    }
+
+    function eliminarReserva(reservaId) {
+        fetch(`/Reservas/Delete/${reservaId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('input[name="__RequestVerificationToken"]')?.value
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                Swal.fire({
+                    title: "Reserva eliminada",
+                    icon: "success",
+                    confirmButtonText: "Aceptar",
+                    confirmButtonColor: '#c68a54', // Color del botón
+                    customClass: {
+                        confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+                    }
+                }).then(() => location.reload()); // Recargar la página después de eliminar
+            } else {
+                Swal.fire("Error", "No se pudo eliminar la reserva.", "error");
+            }
+        })
+        .catch(error => {
+            Swal.fire("Error", "Ocurrió un error inesperado.", "error");
+            console.error("Error al eliminar:", error);
+        });
+    }
+</script>
+
+
+
+<style>
+    .carta {
+        width: 100%;
+        height: auto;
+        border-radius: 15px;
+        background: #dc8a3e;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+        margin: 15px;
+        transition: all .5s ease;
+                text-decoration: none;
+    }
+
+        .carta:hover {
+            transform: scale(1.05);
+            cursor: pointer;
+        }
+
+        .carta::before {
+            content: "";
+            height: 100px;
+            width: 100px;
+            position: absolute;
+            top: -40%;
+            left: -20%;
+            border-radius: 50%;
+            border: 35px solid rgba(255, 255, 255, 0.102);
+            transition: all .8s ease;
+            filter: blur(.5rem);
+        }
+
+    .text {
+        flex-grow: 1;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        color: white;
+        font-weight: 900;
+        font-size: 1.2em;
+    }
+
+    .subtitle {
+        margin-top: 3px;
+        font-size: .8em;
+        font-weight: 400;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .icons {
+        display: flex;
+        flex-wrap: wrap; /* Permite que los botones se acomoden si no caben */
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        border-radius: 0px 0px 15px 15px;
+        overflow: hidden;
+    }
+
+    .button {
+        border: none;
+        flex: 1;
+        min-width: 60px;
+        max-width: 100px;
+        padding: 10px;
+        background-color: rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s ease-in-out; /* Transición suave */
+        text-decoration: none;
+    }
+
+    .svg-icon {
+        font-size: 1.2em;
+        color: white;
+        transition: color 0.3s ease-in-out; /* Cambio de color suave */
+    }
+
+    .button:hover {
+        background-color: white; /* Mantener el fondo */
+    }
+
+        .button:hover .svg-icon {
+            color: #dc8a3e; /* Cambiar el color del ícono */
+        }
+
+    .carta:hover::before {
+        width: 140px;
+        height: 140px;
+        top: -30%;
+        left: 50%;
+        filter: blur(0rem);
+    }
+
+    .linkNueva {
+        color: #dc8a3e;
+        font-weight: 900;
+    }
+</style>

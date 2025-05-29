@@ -1,0 +1,258 @@
+﻿@using NugetProyectoBackPeluqueria.Models
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+@model List<Usuario>
+
+    @{
+        string imagenUrl = Configuration.GetValue<string>("AzureUrls:AvatarsContainer");
+    }
+
+<div class="text-center">
+    <h1 class="display-3 text-primary">Clientes</h1>
+    <p class="text-secondary">En ésta página podrás gestionar tus clientes</p>
+</div>
+
+<div class="d-flex justify-content-center mb-4">
+    <a asp-controller="Management" asp-action="Index" class="btn btn-secondary mx-2">
+        <i class="fa-solid fa-arrow-left"></i> Volver
+    </a>
+    <a asp-action="Create" class="btn btn-primary mx-2">
+        <i class="fa-solid fa-plus"></i> Nuevo Usuario
+    </a>
+</div>
+
+<div class="mb-3 d-flex justify-content-center">
+    <input type="text" id="buscador" class="form-control w-50" placeholder="Buscar cliente por su nombre..." onkeyup="filtrarClientes()">
+</div>
+
+<div class="row mt-3">
+    @if (Model.Count > 0)
+    {
+        @foreach (var usuario in Model)
+        {
+            <div class="col-lg-4 col-md-6 col-sm-12 d-flex justify-content-center" id="cliente-card" data-nombre="@usuario.Nombre @usuario.Apellidos">
+                <div class="card" data-image="@imagenUrl@usuario.Imagen">
+                    <div class="text">
+                        <p class="subtitle">@usuario.Telefono</p>
+                        <span>@usuario.Nombre @usuario.Apellidos</span>
+                    </div>
+                    <div class="icons">
+                        <a asp-controller="Management" asp-action="Edit" asp-route-id="@usuario.Id" class="button">
+                            <i class="fa-solid fa-pen svg-icon"></i>
+                        </a>
+                        <a asp-controller="Management" asp-action="Index" asp-route-id="@usuario.Id" class="button">
+                            <i class="fa-solid fa-info svg-icon"></i>
+                        </a>
+                        <a href="javascript:void(0);" onclick="confirmarEliminacion(@usuario.Id)" class="button">
+                            <i class="fa-solid fa-trash-can svg-icon"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-center">
+            <p class="text-secondary">Aún no hay clientes.</p>
+        </div>
+    }
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    function filtrarClientes() {
+        let input = document.getElementById('buscador').value.toLowerCase();
+        let clientes = document.querySelectorAll('#cliente-card');        
+
+        clientes.forEach(cliente => {
+            let nombre = cliente.getAttribute('data-nombre').toLowerCase();
+            if (nombre.includes(input)) {
+                cliente.classList.remove('d-none'); // Muestra el cliente
+        } else {
+            cliente.classList.add('d-none'); // Oculta el cliente
+        }
+        });
+    }
+</script>
+
+<script>
+
+    function confirmarEliminacion(usuarioId) {
+        Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Eliminarás este usuario y todas las referencias asociadas.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar",
+            confirmButtonColor: '#c68a54', // Color del botón
+            customClass: {
+                confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                eliminarUsuario(usuarioId);
+            }
+        });
+    }
+
+    function eliminarUsuario(usuarioId) {
+        fetch(`/Clientes/Delete/${usuarioId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('input[name="__RequestVerificationToken"]')?.value
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                Swal.fire({
+                    title: "Usuario eliminado",
+                    icon: "success",
+                    confirmButtonText: "Aceptar",
+                    confirmButtonColor: '#c68a54', // Color del botón
+                    customClass: {
+                        confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+                    }
+                }).then(() => location.reload()); // Recargar la página después de eliminar
+            } else {
+                Swal.fire("Error", "No se pudo eliminar el usuario.", "error");
+            }
+        })
+        .catch(error => {
+            Swal.fire("Error", "Ocurrió un error inesperado.", "error");
+            console.error("Error al eliminar:", error);
+        });
+    }
+
+
+    // Cambiar la imagen de fondo en el pseudo-elemento ::before de la card
+    document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            const imageUrl = card.getAttribute('data-image');
+            // Agregar la imagen de fondo al pseudo-elemento ::before usando JavaScript
+            const beforeStyle = `url(${imageUrl})`;
+            card.style.setProperty('--card-image', beforeStyle);
+        });
+
+        card.addEventListener('mouseleave', function() {
+            // Resetear el fondo cuando el ratón sale
+            card.style.removeProperty('--card-image');
+        });
+    });
+</script>
+
+<style>
+    .card {
+        width: 250px;
+        height: auto;
+        border-radius: 15px;
+        background: rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+        margin: 15px;
+        transition: all .5s ease;
+    }
+
+        .card:hover {
+            transform: scale(1.05);
+            cursor: pointer;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 10%;
+            left: -20%;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-image: var(--card-image);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: blur(0.5rem);
+            opacity: 0.3;
+            transition: all 1s ease;
+            z-index: -1; /* Se coloca detrás del contenido */
+        }
+
+    .text {
+        flex-grow: 1;
+        padding: 10px; /* Reducido para que haya menos espacio interno */
+        display: flex;
+        flex-direction: column;
+        color: white;
+        font-weight: 900;
+        font-size: 1.2em;
+        position: relative;
+        z-index: 1;
+        border-radius: 10px;
+        margin-top: 20px; /* Reducido para acercar el texto a los botones */
+    }
+
+    .subtitle {
+        font-size: 0.9em; /* Un poco más grande para mejor visibilidad */
+        font-weight: 400;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 2px; /* Espacio mínimo entre título y subtítulo */
+    }
+
+    .text span {
+        font-size: 1.1em; /* Ajusta el tamaño del nombre */
+        margin-top: -3px; /* Reduce aún más la separación */
+    }
+
+
+    .icons {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        border-radius: 0px 0px 15px 15px;
+        overflow: hidden;
+    }
+
+    .button {
+        border: none;
+        flex: 1;
+        min-width: 60px;
+        max-width: 100px;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s ease-in-out;
+        text-decoration: none;
+    }
+
+    .svg-icon {
+        font-size: 1.2em;
+        color: white;
+        transition: color 0.3s ease-in-out;
+    }
+
+    .button:hover {
+        background-color: white;
+    }
+
+        .button:hover .svg-icon {
+            color: rgba(0, 0, 0, 0.3);
+        }
+
+    .card:hover::before {
+        width: 120px;
+        height: 120px;
+        top: -20%;
+        left: 60%;
+        filter: blur(0rem);
+    }
+
+</style>

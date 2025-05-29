@@ -1,0 +1,81 @@
+﻿
+<div class="text-center">
+    <h1 class="display-3 text-primary">Nuevo Servicio</h1>
+    <p class="text-secondary">Introduce los datos del nuevo servicio</p>
+</div>
+
+<form class="mt-3" method="post">
+    <div class="mb-3">
+        <label for="Nombre" class="form-label">Nombre</label>
+        <input type="text" id="Nombre" name="Nombre" class="form-control" required />
+    </div>
+    <div class="mb-3">
+        <label for="Descripcion" class="form-label">Descripcion</label>
+        <input type="text" id="Descripcion" name="Descripcion" class="form-control" required />
+    </div>
+    <div class="mb-3">
+        <label for="DuracionMinutos" class="form-label">
+            Duración (minutos):
+            <span id="valorDuracion">30</span> min
+        </label>
+        <input type="range" id="DuracionMinutos" name="DuracionMinutos" class="form-range"
+               min="30" max="240" step="30" value="30" />
+    </div>
+    <div class="mb-3">
+        <label for="Precio" class="form-label">Precio</label>
+        <input type="text" id="Precio" name="Precio" class="form-control"
+               required />
+    </div>
+    <div class="d-flex justify-content-between mt-5">
+        <a asp-action="Index" class="btn btn-secondary me-2 w-50">Volver</a>
+        <button type="submit" class="btn btn-primary ms-2 w-50">Guardar</button>
+    </div>
+
+</form>
+
+
+<script>
+    function formatearPrecio(input) {
+        input.value = input.value.replace(",", "."); // Cambia la coma por punto
+    }
+</script>
+
+<script>
+    document.getElementById("DuracionMinutos").addEventListener("input", function() {
+        document.getElementById("valorDuracion").textContent = this.value;
+    });
+</script>
+
+
+<style>
+    .container {
+        max-width: 600px;
+        margin-top: 50px;
+    }
+
+    .form-select {
+        font-size: 1.1rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+    }
+
+    .btn-primary {
+        font-size: 1.2rem;
+        padding: 0.75rem;
+        border-radius: 8px;
+    }
+
+    .shadow-lg {
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .bg-light {
+        background-color: #f8f9fa !important;
+    }
+
+    h2 {
+        font-family: 'Arial', sans-serif;
+    }
+</style>

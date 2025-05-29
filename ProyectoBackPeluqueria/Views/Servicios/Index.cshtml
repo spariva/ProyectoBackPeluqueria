@@ -1,0 +1,211 @@
+﻿@using NugetProyectoBackPeluqueria.Models
+
+@model List<Servicio>
+
+<div class="text-center">
+    <h1 class="display-3 text-primary">Servicios</h1>
+    <p class="text-secondary">En ésta página podrás gestionar tus servicios</p>
+</div>
+
+<div class="d-flex justify-content-center mb-4">
+    <a asp-controller="Management" asp-action="Index" class="btn btn-secondary mx-2">
+        <i class="fa-solid fa-arrow-left"></i> Volver
+    </a>
+    <a asp-action="Create" class="btn btn-primary mx-2">
+        <i class="fa-solid fa-plus"></i> Nuevo Servicio
+    </a>
+</div>
+
+<div class="row mt-3">
+    @foreach (var servicio in Model)
+    {
+        <div class="col-lg-4 col-md-6 col-sm-12 d-flex justify-content-center">
+            <div class="card">
+                <div class="text">
+                    <span>@servicio.Nombre</span>
+                    <p class="subtitle">@servicio.Descripcion</p>
+                </div>
+                <div class="icons">
+                    <a asp-action="Edit" asp-route-id="@servicio.Id" class="button">
+                        <i class="fa-solid fa-pen svg-icon"></i>
+                    </a>
+                    <a href="javascript:void(0);" onclick="mostrarInfo('@servicio.Nombre', '@servicio.Descripcion', '@servicio.DuracionMinutos', '@servicio.Precio')" class="button">
+                        <i class="fa-solid fa-info svg-icon"></i>
+                    </a>
+
+                    <a href="javascript:void(0);" onclick="confirmarEliminacion(@servicio.Id)" class="button">
+                        <i class="fa-solid fa-trash-can svg-icon"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function confirmarEliminacion(servicioId) {
+        Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Eliminarás el servicio y todas las reservas para éste.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar",
+            confirmButtonColor: '#c68a54', // Color del botón
+            customClass: {
+                 confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                eliminarServicio(servicioId);
+            }
+        });
+    }
+
+    function eliminarServicio(servicioId) {
+        fetch(`/Servicios/Delete/${servicioId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('input[name="__RequestVerificationToken"]')?.value
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                Swal.fire({
+                    title: "Servicio eliminado",
+                    icon: "success",
+                    confirmButtonText: "Aceptar",
+                    confirmButtonColor: '#c68a54', // Color del botón
+                    customClass: {
+                        confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+                    }
+                }).then(() => location.reload()); // Recargar la página después de eliminar
+            } else {
+                Swal.fire("Error", "No se pudo eliminar el servicio.", "error");
+            }
+        })
+        .catch(error => {
+            Swal.fire("Error", "Ocurrió un error inesperado.", "error");
+            console.error("Error al eliminar:", error);
+        });
+    }
+</script>
+
+<script>
+    function mostrarInfo(nombre, descripcion, duracion, precio) {
+        Swal.fire({
+            title: nombre,
+            html: `<p><strong>Descripción:</strong> ${descripcion}</p>
+                   <p><strong>Duración:</strong> ${duracion} minutos</p>
+                   <p><strong>Precio:</strong> ${precio} €</p>`,
+            icon: "info",
+            confirmButtonText: "Cerrar",
+            confirmButtonColor: "#c68a54"
+        });
+    }
+</script>
+
+
+
+
+
+
+
+
+<style>
+    .card {
+    width: 250px;
+    height: auto;
+    border-radius: 15px;
+    background: #dc8a3e;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    margin: 15px;
+        transition: all .5s ease;
+    }
+
+    .card:hover {
+        transform: scale(1.05);
+    }
+
+    .card::before {
+    content: "";
+    height: 100px;
+    width: 100px;
+    position: absolute;
+    top: -40%;
+    left: -20%;
+    border-radius: 50%;
+    border: 35px solid rgba(255, 255, 255, 0.102);
+    transition: all .8s ease;
+    filter: blur(.5rem);
+    }
+
+    .text {
+    flex-grow: 1;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    color: white;
+    font-weight: 900;
+    font-size: 1.2em;
+    }
+
+    .subtitle {
+        margin-top: 3px;
+    font-size: .8em;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.9);
+    }
+
+    .icons {
+        display: flex;
+        flex-wrap: wrap; /* Permite que los botones se acomoden si no caben */
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        border-radius: 0px 0px 15px 15px;
+        overflow: hidden;
+    }
+
+    .button {
+        border: none;
+        flex: 1;
+        min-width: 60px;
+        max-width: 100px;
+        padding: 10px;
+        background-color: rgba(255, 255, 255, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s ease-in-out; /* Transición suave */
+        text-decoration: none;
+    }
+
+    .svg-icon {
+        font-size: 1.2em;
+        color: white;
+        transition: color 0.3s ease-in-out; /* Cambio de color suave */
+    }
+
+    .button:hover {
+        background-color: white; /* Mantener el fondo */
+    }
+
+        .button:hover .svg-icon {
+            color: #dc8a3e; /* Cambiar el color del ícono */
+        }
+
+    .card:hover::before {
+    width: 140px;
+    height: 140px;
+    top: -30%;
+    left: 50%;
+    filter: blur(0rem);
+    }
+</style>

@@ -1,0 +1,387 @@
+html {
+    font-size: 14px;
+    -ms-overflow-style: none; /* Para Internet Explorer y Edge */
+    scrollbar-width: none; /* Para Firefox */
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+    overflow: scroll; /* Habilita el scroll */
+}
+
+.link-auth {
+    color: #dc8a3e;
+    text-decoration: none;
+}
+
+    .link-auth:hover {
+        text-decoration: underline;
+    }
+
+/* Barra (track) gris todo el tiempo */
+.form-range::-webkit-slider-runnable-track {
+    background-color: #b3b3b3; /* Gris todo el tiempo */
+    height: 0.5rem;
+    border-radius: 1rem;
+}
+
+.form-range::-moz-range-track {
+    background-color: #b3b3b3; /* Gris todo el tiempo */
+    height: 0.5rem;
+    border-radius: 1rem;
+}
+
+/* Círculo del deslizador (thumb) siempre naranja */
+.form-range::-webkit-slider-thumb {
+    background-color: #dc8a3e; /* Naranja todo el tiempo */
+    width: 1rem;
+    height: 1rem;
+    border-radius: 1rem;
+    -webkit-appearance: none;
+    appearance: none;
+    border: none; /* Eliminar borde */
+    box-shadow: none; /* Eliminar sombra */
+}
+
+/* Círculo (thumb) siempre naranja en Firefox */
+.form-range::-moz-range-thumb {
+    background-color: #dc8a3e; /* Naranja todo el tiempo */
+    width: 1rem;
+    height: 1rem;
+    border-radius: 1rem;
+    -moz-appearance: none;
+    appearance: none;
+    border: none; /* Eliminar borde */
+    box-shadow: none; /* Eliminar sombra */
+}
+
+.form-range:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+    .form-range:focus::-webkit-slider-thumb {
+        background-color: #dc8a3e; /* Naranja todo el tiempo */
+        box-shadow: none;
+    }
+
+    .form-range:focus::-moz-range-thumb {
+        background-color: #dc8a3e; /* Naranja todo el tiempo */
+        box-shadow: none;
+    }
+
+/* Cuando está deshabilitado */
+.form-range:disabled::-webkit-slider-thumb,
+.form-range:disabled::-moz-range-thumb {
+    background-color: #b3b3b3; /* Gris cuando está deshabilitado */
+}
+
+.form-range:disabled::-webkit-slider-runnable-track,
+.form-range:disabled::-moz-range-track {
+    background-color: #e0e0e0; /* Gris claro cuando está deshabilitado */
+}
+
+
+
+
+@media (max-width: 574px) {
+    .logo
+
+{
+    display: none;
+}
+
+}
+
+body::-webkit-scrollbar {
+    display: none; /* Oculta la barra de desplazamiento en navegadores WebKit (Chrome, Safari) */
+}
+
+.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
+  color: var(--bs-secondary-color);
+  text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+  text-align: start;
+}
+
+/* Cambiar el fondo de las opciones cuando están seleccionadas */
+select.form-control option:checked,
+select.form-select option:checked {
+    background-color: #dc8a3e; /* Fondo naranja cuando se selecciona una opción */
+    color: #fff; /* Cambiar color de texto cuando la opción es seleccionada */
+}
+
+
+
+/* Estilo general para el contenedor con imagen de fondo */
+body {
+    background-image: url('https://img.freepik.com/foto-gratis/vista-superior-accesorios-concepto-bano_23-2148419437.jpg?t=st=1740130830~exp=1740134430~hmac=446bb8bcd4757d10263351c4ed23679a51f881ce36a4d6167dc7d23188180a77&w=1060'); /* Asegúrate de que la ruta sea correcta */
+    background-size: cover; /* Asegura que la imagen cubra todo el contenedor */
+    background-position: right; /* Mueve la imagen hacia la derecha en pantallas pequeñas */
+    background-attachment: fixed; /* Fija la imagen al hacer scroll */
+    min-height: 100vh; /* Hace que el contenedor ocupe al menos el alto completo de la pantalla */
+    padding: 20px;
+    border-radius: 10px;
+    padding-top: 75px;
+}
+
+.container {
+    background-color: rgba(255, 255, 255, 0.75);
+    padding: 25px;
+}
+
+
+.loader {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: inline-block;
+    position: relative;
+    border: 3px solid;
+    border-color: #FFF #FFF transparent transparent;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+    .loader::after,
+    .loader::before {
+        content: '';
+        box-sizing: border-box;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        border: 3px solid;
+        border-color: transparent transparent #dc8a3e #dc8a3e;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        box-sizing: border-box;
+        animation: rotationBack 0.5s linear infinite;
+        transform-origin: center center;
+    }
+
+    .loader::before {
+        width: 32px;
+        height: 32px;
+        border-color: #FFF #FFF transparent transparent;
+        animation: rotation 1.5s linear infinite;
+    }
+
+.swal-btn-custom {
+    background-color: #c68a54 !important;
+    border-color: #c68a54 !important;
+}
+
+    .swal-btn-custom:hover {
+        background-color: #a56a41 !important; /* Color de hover */
+        border-color: #a56a41 !important;
+    }
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes rotationBack {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(-360deg);
+    }
+}
+
+
+/* Estilo del calendario */
+/* Asegura que el contenedor del calendario se adapte al tamaño de la pantalla */
+#calendar {
+    width: 100%; /* Establece el contenedor para que ocupe todo el ancho */
+    max-width: 100%; /* Limita el ancho máximo para que no se desborde */
+    height: auto; /* Deja que la altura se ajuste automáticamente */
+    margin: 0 auto; /* Centra el calendario si es necesario */
+}
+
+/* Para pantallas pequeñas (por ejemplo, móviles) */
+@media (max-width: 768px) {
+    /* Cambia la altura del calendario o la vista */
+    #calendar {
+        height: 600px; /* Puedes ajustar la altura según tu necesidad */
+    }
+
+    /* Cambia la vista a un modo de lista o un grid más compacto */
+    .fc-view-timeGridDay, .fc-view-timeGridWeek {
+        font-size: 14px; /* Reduce el tamaño de fuente en dispositivos pequeños */
+    }
+}
+
+/* Para pantallas más grandes (por ejemplo, tabletas o escritorios) */
+@media (min-width: 768px) {
+    #calendar {
+        height: 800px; /* Ajusta la altura para pantallas más grandes */
+    }
+}
+
+
+.fc .fc-list-event:hover td {
+    background-color: transparent !important;
+}
+/* Asegúrate de que el contenedor de los botones sea flexible */
+.fc-header-toolbar {
+    display: flex;
+    flex-wrap: wrap; /* Esto permite que los botones se acomoden en varias filas si es necesario */
+    justify-content: space-between; /* Espaciado entre los botones */
+}
+
+    .fc-header-toolbar .fc-button {
+        flex: 1 1 auto; /* Los botones pueden expandirse y adaptarse al espacio disponible */
+        min-width: 100px; /* Define un tamaño mínimo para los botones */
+        margin: 5px; /* Margen entre los botones */
+    }
+
+    .fc-header-toolbar .fc-button-group {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-evenly;
+    }
+
+/* Cuando la pantalla es más pequeña (móviles) */
+@media (max-width: 768px) {
+    .fc-header-toolbar .fc-button {
+        flex: 1 1 45%; /* Los botones ocuparán el 45% del ancho en pantallas pequeñas */
+        min-width: 80px; /* Tamaño mínimo ajustado para móviles */
+    }
+}
+
+
+.fc .fc-col-header-cell-cushion {
+    color: #dc8a3e;
+    text-decoration: none;
+}
+
+.fc .fc-daygrid-day-number {
+    color: #dc8a3e;
+    text-decoration: none;
+}
+.fc-direction-ltr .fc-list-day-text, .fc-direction-rtl .fc-list-day-side-text {
+    color: #dc8a3e;
+    text-decoration: none;
+}
+
+.fc-direction-ltr .fc-list-day-side-text, .fc-direction-rtl .fc-list-day-text {
+    color: #dc8a3e;
+    text-decoration: none;
+}
+.fc .fc-list-event-dot {
+    display: none;
+}
+/*.fc-list-event:hover .fc .fc-list-table td {
+    backround-color: red;
+}*/
+/* Eliminar el fondo blanco en el hover de los eventos */
+.fc-list-item:hover {
+    background-color: transparent !important; /* Elimina el fondo blanco */
+    box-shadow: none !important; /* Elimina cualquier sombra adicional */
+    color: white !important; /* Asegura que el color del texto siga siendo blanco */
+}
+
+/* Si la clase anterior no funciona, prueba con esta */
+.fc-list-item.fc-state-hover {
+    background-color: transparent !important;
+    color: white !important;
+    border-color: #c07b2f !important;
+}
+
+
+/* Asegura que el contenedor del evento sea flexible */
+.fc-event {
+    white-space: normal; /* Permite que el texto se ajuste y se divida en varias líneas */
+    word-wrap: break-word; /* Rompe las palabras largas si es necesario */
+    overflow: hidden; /* Evita que el texto se desborde */
+    text-overflow: ellipsis; /* Añade "..." si el texto es demasiado largo */
+    padding: 5px; /* Ajusta el relleno para evitar que el texto se pegue a los bordes */
+    box-sizing: border-box; /* Asegura que el padding no afecte el tamaño total */
+    font-size: 17px; /* Tamaño de fuente predeterminado */
+    margin: 3px; /* Añade un pequeño margen entre eventos */
+}
+
+/* Ajustes específicos para pantallas pequeñas (responsive) */
+@media (max-width: 768px) {
+    .fc-event {
+        font-size: 12px; /* Reduce el tamaño de la fuente en dispositivos pequeños */
+        padding: 3px; /* Reduce el relleno */
+    }
+
+    /* Asegura que el texto se ajuste mejor en eventos pequeños */
+    .fc-event-title {
+        white-space: normal; /* Permite el salto de línea en títulos largos */
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Si el evento tiene mucho texto, usa más espacio en la vista de móvil */
+    .fc-event-time, .fc-event-title {
+        font-size: 5px; /* Reduces el tamaño de texto de la hora y título para dispositivos móviles */
+    }
+}
+
+/* Aseguramos que los eventos en la vista semanal se ajusten mejor */
+@media (max-width: 768px) {
+    .fc-time-grid-event {
+        font-size: 12px; /* Reducimos el tamaño de la fuente */
+        padding: 3px; /* Reducimos el espacio alrededor del texto */
+    }
+
+    /* Para la vista semanal, aseguramos que no se desborden */
+    .fc-event-title {
+        white-space: normal; /* Permite que el texto se divida en varias líneas */
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Ajuste de las horas de los eventos */
+    .fc-time-grid-event .fc-event-time {
+        font-size: 10px; /* Reducción del tamaño de la hora */
+    }
+
+    .fc-time-grid .fc-slats .fc-slot {
+        height: 80px; /* Aumenta la altura de las celdas de la hora */
+    }
+}
+
+
+.fc .fc-timegrid-slot {
+    height: 5rem;
+}
+
+/* Para pantallas pequeñas */
+@media (max-width: 576px) {
+    .button {
+        width: 100%;
+    }
+
+    .svg-icon {
+        font-size: 1em;
+    }
+}

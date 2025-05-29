@@ -1,0 +1,82 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<section class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h1 class="display-3 text-primary">Bienvenido/a a Iris D´Vicent</h1>
+        <p>Transformamos tu estilo con el mejor cuidado</p>
+        <a asp-controller="Reservas" asp-action="Create" class="btn btn-primary">Reserva tu cita</a>
+    </div>
+</section>
+
+<section class="services text-center">
+    <div>
+        <h3 class=" display-4 text-primary mb-4">Nuestros Servicios</h3>
+        <div class="row">
+            <div class="col-md-4">
+                <i class="fa-solid fa-scissors fa-3x mb-1"></i>
+                <h4>Cortes modernos</h4>
+            </div>
+            <div class="col-md-4">
+                <i class="fa-solid fa-paint-brush fa-3x mb-1"></i>
+                <h4>Coloración profesional</h4>
+            </div>
+            <div class="col-md-4">
+                <i class="fa-solid fa-spa fa-3x mb-1"></i>
+                <h4>Tratamientos capilares</h4>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<style>
+    .hero {
+        position: relative;
+        height: 75vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: white;
+        border-radius: 10px;
+        overflow: hidden; /* Evita que la imagen se desborde */
+    }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/images/imgInicio.jpg') no-repeat center center/cover;
+            transition: transform 1.5s ease-in-out;
+        }
+
+        .hero:hover::before {
+            transform: scale(1.1);
+        }
+
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 10px;
+    }
+
+
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .services {
+        padding: 50px 0;
+    }
+</style>

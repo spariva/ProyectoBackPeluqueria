@@ -1,0 +1,219 @@
+﻿@using NugetProyectoBackPeluqueria.Models
+
+@using System.Security.Claims
+@{
+    ViewData["Title"] = "Nueva Reserva";
+}
+@model List<Servicio>
+
+<!-- Título de la página -->
+<div class="text-center">
+    <h1 class="display-3 text-primary">Nueva reserva</h1>
+    <p class="text-secondary">Introduce los datos de la nueva reserva</p>
+</div>
+
+<form id="reservaForm" class="mt-3 p-4">
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="mb-3">
+            <label for="cliente" class="form-label">Cliente</label>
+            <select id="cliente" name="clienteId" class="form-select">
+                @foreach (Usuario cliente in (List<Usuario>)ViewData["Clientes"])
+                {
+                    <option value="@cliente.Id">@cliente.Nombre @cliente.Apellidos</option>
+                }
+            </select>
+        </div>
+    } else {
+        <input type="hidden" id="cliente" name="clienteId" value="@User.FindFirstValue(ClaimTypes.NameIdentifier)" />
+    }
+    
+    <div class="mb-3">
+        <label for="servicio" class="form-label">Servicio</label>
+        <select id="servicio" name="servicioId" class="form-select">
+            @foreach (var servicio in Model)
+            {
+                <option value="@servicio.Id">@servicio.Nombre</option>
+            }
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="fecha" class="form-label">Fecha</label>
+        <input type="date" id="fecha" name="fecha" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label for="hora" class="form-label">Hora</label>
+        <select id="hora" name="hora" class="form-select">
+            <option value="">Selecciona una hora</option>
+        </select>
+    </div>
+
+    <div class="d-flex justify-content-between">
+        <!-- Botón para reservar -->
+        <button disabled id="btnSumbit" type="submit" class="btn btn-primary w-100 mt-5">Reservar</button>
+    </div>
+</form>
+
+<!-- Indicador de carga (overlay) -->
+<div id="loadingOverlay" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); z-index: 9999; text-align: center; justify-content: center; align-items: center;">
+    @* <div class="spinner-border text-light" role="status" style="margin-top: 20%;">
+        <span class="sr-only"></span>
+    </div> *@
+    <span class="loader" style="margin-top: 20%;"></span>
+    <p class="text-light">Procesando reserva...</p>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Cuando se cambia el servicio o la fecha
+        function obtenerHorariosDisponibles() {
+            var servicioId = $('#servicio').val();
+            var fecha = $('#fecha').val();
+
+            if (servicioId && fecha) {
+                $('#btnSumbit').prop('disabled', false);
+                // Llamar al servidor para obtener los horarios disponibles
+                $.ajax({
+                    url: '@Url.Action("ObtenerHorariosDisponibles", "Reservas")',
+                    type: 'GET',
+                    data: { servicioId: servicioId, fecha: fecha },
+                    success: function (data) {
+                        if (data.length === 0) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Servicio no disponible',
+                                text: 'No hay horarios disponibles para el servicio de ' + $('#servicio').find('option:selected').text().toLowerCase() + ' en la fecha seleccionada.',
+                                confirmButtonText: 'Aceptar',
+                                confirmButtonColor: '#c68a54', // Color del botón
+                                customClass: {
+                                    confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+                                }
+                            })
+                            $('#fecha').val('');
+                            $('#hora').empty();
+                            $('#hora').append('<option value="">Selecciona una hora</option>');
+                            $('#btnSumbit').prop('disabled', true);
+                            return;
+                        }
+                        // Limpiar opciones de hora
+                        $('#hora').empty();
+
+                        // Llenar las horas disponibles
+                        data.forEach(function (horario) {
+                            $('#hora').append('<option value="' + horario.horaInicio + '">' + horario.horaInicio + '</option>');
+                        });
+                    }
+                });
+            } else {
+                $('#btnSumbit').prop('disabled', true);
+                $('#hora').empty();
+                $('#hora').append('<option value="">Selecciona una hora</option>');
+            }
+        }
+
+        // Cuando se cambia el servicio
+        $('#servicio').change(function () {
+            obtenerHorariosDisponibles();
+        });
+
+        // Cuando se cambia la fecha
+        $('#fecha').change(function () {
+            obtenerHorariosDisponibles();
+        });
+
+        // Manejar el submit del formulario
+        $('#reservaForm').submit(function (e) {
+            e.preventDefault();
+
+            var clienteId = $('#cliente').val();
+            var servicioId = $('#servicio').val();
+            var fechaHoraInicio = $('#fecha').val() + ' ' + $('#hora').val();
+
+            console.log(clienteId, servicioId, fechaHoraInicio);
+
+            // Mostrar el overlay de carga
+            $('#loadingOverlay').show();
+            $('#btnSumbit').prop('disabled', true);
+
+            $.ajax({
+                url: '@Url.Action("InsertarReserva", "Reservas")',
+                type: 'POST',
+                data: {
+                    clienteId: clienteId,
+                    servicioId: servicioId,
+                    fechaHoraInicio: fechaHoraInicio
+                },
+                success: function (response) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Reserva realizada con éxito',
+                        text: 'Resvisa tu correo electrónico para ver los detalles de la reserva',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#c68a54', // Color del botón
+                        customClass: {
+                            confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+                        }
+                    }).then(function () {
+                        window.location.href = '@Url.Action("Index", "Management")'; // Redirigir a la lista de reservas
+                    });
+                },
+                error: function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error al realizar la reserva',
+                        text: 'No se ha podido realizar la reserva. Por favor, vuelva a intentarlo.',
+                        confirmButtonText: 'Aceptar',
+                        confirmButtonColor: '#c68a54', // Color del botón
+                        customClass: {
+                            confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+                        }
+                    })
+                },
+                complete: function () {
+                    // Ocultar el overlay de carga
+                    $('#loadingOverlay').hide();
+                    $('#btnSumbit').prop('disabled', false);
+                }
+            });
+        });
+    });
+</script>
+
+
+
+<!-- Agregar algunos estilos adicionales para mejorar la presentación -->
+<style>
+    .container {
+        max-width: 600px;
+        margin-top: 50px;
+    }
+
+    .form-select {
+        font-size: 1.1rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+    }
+
+    .btn-primary {
+        font-size: 1.2rem;
+        padding: 0.75rem;
+        border-radius: 8px;
+    }
+
+    .shadow-lg {
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .bg-light {
+        background-color: #f8f9fa !important;
+    }
+
+    h2 {
+        font-family: 'Arial', sans-serif;
+    }
+</style>

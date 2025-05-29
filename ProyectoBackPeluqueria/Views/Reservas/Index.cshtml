@@ -1,0 +1,116 @@
+﻿@using NugetProyectoBackPeluqueria.Models
+
+@{
+    ViewData["Title"] = "Reservas Page";
+}
+@model List<ReservaView>
+
+<div class="text-center">
+    <h1 class="display-3 text-primary">Reservas</h1>
+    <p class="text-secondary">Aquí se podrás ver todas las reservas.</p>
+</div>
+
+<div class="d-flex justify-content-center mb-4">
+    <a asp-controller="Management" asp-action="Index" class="btn btn-secondary mx-2">
+        <i class="fa-solid fa-arrow-left"></i> Volver
+    </a>
+    <a asp-action="Create" class="btn btn-primary mx-2">
+        <i class="fa-solid fa-plus"></i> Nueva Reserva
+    </a>
+</div>
+
+@if(Model.Count > 0) {
+    <table class="table table-striped mt-5">
+        <thead>
+            <tr>
+                <th>Cliente</th>
+                <th>Servicio</th>
+                <th>Fecha</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var reserva in Model)
+            {
+                var esHoy = reserva.FechaHoraInicio.Date == DateTime.Today;
+                <tr class="@(esHoy ? "reserva-hoy" : "")">
+                    <td>@reserva.Cliente</td>
+                    <td>@reserva.Servicio</td>
+                    <td>@reserva.FechaHoraInicio.ToString("yyyy-MM-dd")</td>
+                    <td>@reserva.FechaHoraInicio.ToString("HH:mm")</td>
+                    <td>@reserva.FechaHoraFin.ToString("HH:mm")</td>
+                    <td>
+                        <a href="javascript:void(0);" onclick="confirmarEliminacion(@reserva.ReservaID)" class="text-danger">
+                            <i class="fa-solid fa-trash-can svg-icon"></i>
+                        </a>
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+} else{
+    <div class="text-center">
+        <p class="text-secondary">Aún no hay reservas.</p>
+    </div>
+}
+
+
+<script>
+    function confirmarEliminacion(reservaId) {
+        Swal.fire({
+            title: "¿Estás seguro?",
+            text: "Eliminarás la reserva permanentemente.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar",
+            confirmButtonColor: '#c68a54', // Color del botón
+            customClass: {
+                 confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                eliminarReserva(reservaId);
+            }
+        });
+    }
+
+    function eliminarReserva(reservaId) {
+        fetch(`/Reservas/Delete/${reservaId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": document.querySelector('input[name="__RequestVerificationToken"]')?.value
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                Swal.fire({
+                    title: "Reserva eliminada",
+                    icon: "success",
+                    confirmButtonText: "Aceptar",
+                    confirmButtonColor: '#c68a54', // Color del botón
+                    customClass: {
+                        confirmButton: 'swal-btn-custom' // Clase personalizada para el botón
+                    }
+                }).then(() => location.reload()); // Recargar la página después de eliminar
+            } else {
+                Swal.fire("Error", "No se pudo eliminar la reserva.", "error");
+            }
+        })
+        .catch(error => {
+            Swal.fire("Error", "Ocurrió un error inesperado.", "error");
+            console.error("Error al eliminar:", error);
+        });
+    }
+</script>
+
+<style>
+    .reserva-hoy {
+        background-color: rgba(0, 255, 0, 0.3) !important; /* Fondo verde transparente */
+        font-weight: bold; /* Mantén el texto en negrita */
+    }
+</style>
