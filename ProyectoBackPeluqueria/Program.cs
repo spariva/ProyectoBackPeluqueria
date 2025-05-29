@@ -21,7 +21,7 @@ SecretClient secretClient = builder.Services.BuildServiceProvider()
 
 KeyVaultSecret secretConnectionString = await secretClient.GetSecretAsync("sqlpeluqueria");
 KeyVaultSecret secretStorageAccount = await secretClient.GetSecretAsync("storageaccount");
-
+//test
 
 BlobServiceClient blobServiceClient = new BlobServiceClient(secretStorageAccount.Value);
 
